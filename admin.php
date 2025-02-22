@@ -7,6 +7,7 @@ if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== tru
     exit();
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -25,7 +26,7 @@ if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== tru
             background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
             font-family: Arial, sans-serif;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
             min-height: 100vh;
         }
@@ -57,6 +58,26 @@ if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== tru
         button:hover {
             background: var(--secondary-color);
         }
+
+        .image-item {
+            margin: 10px 0;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .image-item img {
+            max-width: 100%;
+            height: auto;
+            margin-bottom: 5px;
+        }
+
+        .delete-button {
+            background: #ff6b6b;
+            width: auto;
+            padding: 5px 10px;
+            margin-top: 5px;
+        }
     </style>
 </head>
 <body>
@@ -69,6 +90,22 @@ if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== tru
             <button type="submit">Save Memory</button>
         </form>
         <p id="statusMessage"></p>
+
+        <h2>Uploaded Images</h2>
+        <div id="imageList">
+            <?php
+            $images = json_decode(file_get_contents('images.json'), true);
+            foreach ($images as $image) {
+                echo '<div class="image-item">';
+                echo '<img src="uploads/' . $image['filename'] . '" alt="Uploaded">';
+                echo '<p>Date: ' . $image['date'] . '</p>';
+                echo '<p>Place: ' . $image['place'] . '</p>';
+                echo '<button class="delete-button" onclick="deleteImage(\'' . $image['filename'] . '\')">Delete</button>';
+                echo '</div>';
+            }
+            ?>
+        </div>
+
         <a href="logout.php" style="display:block; margin-top:20px; color:#333;">Logout</a>
     </div>
 
@@ -89,6 +126,7 @@ if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== tru
                 if(data.success) {
                     statusMessage.style.color = 'green';
                     this.reset();
+                    location.reload();
                 } else {
                     statusMessage.style.color = 'red';
                 }
@@ -99,6 +137,30 @@ if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== tru
                 statusMessage.style.color = 'red';
             });
         });
+
+        function deleteImage(filename) {
+            if (confirm('Are you sure you want to delete this image?')) {
+                fetch('delete_image.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: 'filename=' + encodeURIComponent(filename)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if(data.success) {
+                        location.reload();
+                    } else {
+                        alert('Error: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error deleting image');
+                });
+            }
+        }
     </script>
 </body>
 </html>

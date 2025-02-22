@@ -3,7 +3,7 @@
 $startDate = new DateTime('2025-02-22');
 $today = new DateTime();
 $interval = $startDate->diff($today);
-$daysTogether = $interval->days;
+$daysTogether = $interval->days + 1; // Add 1 to include both start and end dates
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -58,6 +58,14 @@ $daysTogether = $interval->days;
             overflow: hidden;
             border-radius: 25px;
             cursor: pointer;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.6s ease;
+        }
+
+        .image-item.visible {
+            opacity: 1;
+            transform: translateY(0);
         }
 
         .image-item img {
@@ -87,6 +95,62 @@ $daysTogether = $interval->days;
         .image-item:hover .info-layer {
             opacity: 1;
         }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+                border-radius: 25px;
+                margin: 10px;
+            }
+
+            .title {
+                font-size: 2.5rem;
+                line-height: 1.2;
+            }
+
+            .image-item {
+                width: 45%;
+                height: auto;
+                aspect-ratio: 1;
+                max-width: 180px;
+            }
+
+            .info-layer {
+                font-size: 14px;
+                padding: 8px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .title {
+                font-size: 2rem;
+            }
+
+            .container {
+                padding: 15px;
+                border-radius: 20px;
+            }
+
+            .image-item {
+                width: 90%;
+                max-width: 250px;
+            }
+
+            p {
+                font-size: 14px;
+            }
+
+            .info-layer {
+                font-size: 12px;
+            }
+        }
+
+        @media (hover: none) {
+            .info-layer {
+                opacity: 1;
+                background: rgba(0,0,0,0.5);
+            }
+        }
     </style>
 </head>
 <body>
@@ -96,10 +160,11 @@ $daysTogether = $interval->days;
         <div class="image-container" id="imageContainer">
             <!-- Images will be loaded here -->
         </div>
-        <a href="admin.php" style="display:block; margin-top:20px; color:#333; text-decoration:none;">Admin Panel</a>
+        <a href="admin.php" style="display:block; margin-top:20px; color:#333; text-decoration:none;">❤️</a>
     </div>
 
     <script>
+        // Load images and handle scroll animations
         fetch('images.json')
             .then(response => response.json())
             .then(images => {
@@ -115,6 +180,15 @@ $daysTogether = $interval->days;
                         </div>
                     `;
                     container.appendChild(imageDiv);
+
+                    // Set up Intersection Observer for scroll animations
+                    const observer = new IntersectionObserver((entries) => {
+                        entries.forEach(entry => {
+                            entry.target.classList.toggle('visible', entry.isIntersecting);
+                        });
+                    }, { threshold: 0.1 });
+
+                    observer.observe(imageDiv);
                 });
             });
     </script>
