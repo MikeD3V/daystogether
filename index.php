@@ -1,9 +1,11 @@
 <?php
-// Calculate days together
-$startDate = new DateTime('2025-02-22');
-$today = new DateTime();
+// Calculate days together with proper handling
+$startDate = new DateTime('2025-02-22 00:00:00', new DateTimeZone('UTC'));
+$today = new DateTime('now', new DateTimeZone('UTC'));
 $interval = $startDate->diff($today);
-$daysTogether = $interval->days + 1; // Add 1 to include both start and end dates
+
+// Show 0 days if start date is in the future
+$daysTogether = $interval->invert ? 0 : $interval->days;
 ?>
 <!DOCTYPE html>
 <html lang="en">
